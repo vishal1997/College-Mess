@@ -1,16 +1,36 @@
+from cs50 import SQL
 from flask import Flask, redirect, url_for, render_template, flash, request, jsonify
-app=Flask(__name__)
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+
+#from sqlalchemy import create_engine
+#from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
-from dataBase import Base, NonVegItem, VegItem,BaseItem
+from dataBase import Base, NonVegItem, VegItem,BaseItem, Student
 from helpers import *
-
-engine = create_engine('sqlite:///messmenu.db')
+from flask_session import Session
+"""engine = create_engine('sqlite:///messmenu.db')
 Base.metadata.bind = engine
 DBsession = sessionmaker(bind=engine)
 db = DBsession()
+"""
+app=Flask(__name__)
+if app.config["DEBUG"]:
+    @app.after_request
+    def after_request(response):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Expires"] = 0
+        response.headers["Pragma"] = "no-cache"
+        return response
+
+# custom filter
+
+# configure session to use filesystem (instead of signed cookies)
+app.config["SESSION_FILE_DIR"] = mkdtemp()
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
+db=SQL("sqlite:///messmenu.db")
 
 @app.route("/")
 @login_required
@@ -48,10 +68,10 @@ def login():
             return apology("must provide password")
 
         # query database for username
-        #rows = db.execute("SELECT * FROM users WHERE username = :username", username=request.form.get("username"))
-        rows=db.query(Student).filter_by(reg_no=request.form['reg_no']).one()
+        rows = db.execute("SELECT * FROM student WHERE reg_no = :reg_no", reg_no=request.form.get("reg_no"))
+        #rows=db.query(Student).filter_by(reg_no=request.form['reg_no'],password=request.form['password']).one()
         # ensure username exists and password is correct
-        if len(rows) != 1 or not pwd_context.verify(request.form.get("password"), rows[0]["hash"]):
+        if len(rows) != 1 or not pwd_context.verify(request.form["password"], rows[0]["password"]):
             return apology("invalid registration no. and/or password")
 
         # remember which user has logged in
@@ -83,7 +103,24 @@ def demand():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user."""
-    return apology("TODO")
+    session.clear()
+    if(request.method=="POST"):
+        if not request.form.get("reg_no"):
+            return apology("You must provide registration number")
+        elif not request.form.get("password"):
+            return apology("You must provide your password")
+        elif not request.form.get("confirm"):
+            return apology("Please confirm your password")
+        elif request.form.get("password")!= request.form.get("confirm"):
+            return apology("Password not matched ")
+        result = db.execute("INSERT INTO student (reg_no,name, password) VALUES(:reg_no , :name, :password)",reg_no=request.form.get("reg_no"), name=request.form.get("name"), password=request.form.get("password"))
+                             
+        if not result:
+            apology("Already Registered")
+        session["user_id"]=result;
+        return redirect(url_for('index'))
+    else:
+        return render_template("register.html")
 
 @app.route("/choice", methods=["GET", "POST"])
 @login_required
