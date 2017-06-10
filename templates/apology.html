@@ -1,7 +1,9 @@
-{% extendes "layout.html" %}
+{% extends "layout.html" %}
+
 {% block title %}
-Apology
+    Apology
 {% endblock %}
-{%block main %}
-Apology
-{{% endblock %}}
+
+{% block main %}
+    {{ top | urlencode }}/{{ bottom | urlencode }}
+{% endblock %}

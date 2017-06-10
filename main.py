@@ -1,4 +1,3 @@
-#from cs50 import SQL
 from flask import Flask, redirect, url_for, render_template, flash, request, jsonify
 
 from sqlalchemy import create_engine
