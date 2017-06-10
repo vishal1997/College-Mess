@@ -1,18 +1,18 @@
-from cs50 import SQL
+#from cs50 import SQL
 from flask import Flask, redirect, url_for, render_template, flash, request, jsonify
 
-#from sqlalchemy import create_engine
-#from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
 from dataBase import Base, NonVegItem, VegItem,BaseItem, Student
 from helpers import *
 from flask_session import Session
-"""engine = create_engine('sqlite:///messmenu.db')
+engine = create_engine('sqlite:///messmenu.db')
 Base.metadata.bind = engine
 DBsession = sessionmaker(bind=engine)
 db = DBsession()
-"""
+
 app=Flask(__name__)
 if app.config["DEBUG"]:
     @app.after_request
@@ -30,7 +30,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-db=SQL("sqlite:///messmenu.db")
+#db=SQL("sqlite:///messmenu.db")
 
 @app.route("/")
 @login_required
@@ -68,14 +68,14 @@ def login():
             return apology("must provide password")
 
         # query database for username
-        rows = db.execute("SELECT * FROM student WHERE reg_no = :reg_no", reg_no=request.form.get("reg_no"))
-        #rows=db.query(Student).filter_by(reg_no=request.form['reg_no'],password=request.form['password']).one()
+        #rows = db.execute("SELECT * FROM student WHERE reg_no = :reg_no", reg_no=request.form.get("reg_no"))
+        rows=db.query(Student).filter_by(reg_no=request.form['reg_no']).one()
         # ensure username exists and password is correct
-        if len(rows) != 1 or not pwd_context.verify(request.form["password"], rows[0]["password"]):
+        if not pwd_context.verify(request.form["password"], rows.password):
             return apology("invalid registration no. and/or password")
 
         # remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = rows.id
 
         # redirect user to home page
         return redirect(url_for("index"))
@@ -113,11 +113,13 @@ def register():
             return apology("Please confirm your password")
         elif request.form.get("password")!= request.form.get("confirm"):
             return apology("Password not matched ")
-        result = db.execute("INSERT INTO student (reg_no,name, password) VALUES(:reg_no , :name, :password)",reg_no=request.form.get("reg_no"), name=request.form.get("name"), password=pwd_context.hash(request.form.get("password")))
-                             
+        #result = db.execute("INSERT INTO student (reg_no,name, password) VALUES(:reg_no , :name, :password)",reg_no=request.form.get("reg_no"), name=request.form.get("name"), password=pwd_context.hash(request.form.get("password")))
+        result=Student(reg_no=request.form['reg_no'], name=request.form['name'], password=pwd_context.hash(request.form.get("password")))
         if not result:
-            apology("Already Registered")
-        session["user_id"]=result;
+            return apology("Already Registered")
+        db.add(result)
+        db.commit()
+        session["user_id"]=result.id;
         return redirect(url_for('index'))
     else:
         return render_template("register.html")
