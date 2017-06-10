@@ -113,7 +113,7 @@ def register():
             return apology("Please confirm your password")
         elif request.form.get("password")!= request.form.get("confirm"):
             return apology("Password not matched ")
-        result = db.execute("INSERT INTO student (reg_no,name, password) VALUES(:reg_no , :name, :password)",reg_no=request.form.get("reg_no"), name=request.form.get("name"), password=request.form.get("password"))
+        result = db.execute("INSERT INTO student (reg_no,name, password) VALUES(:reg_no , :name, :password)",reg_no=request.form.get("reg_no"), name=request.form.get("name"), password=pwd_context.hash(request.form.get("password")))
                              
         if not result:
             apology("Already Registered")
