@@ -53,21 +53,21 @@ def select():
         try:
             countItem1=db.query(BaseItem).filter_by(item=request.form["base"]).one()
         except:
-            return apology("Select a base item")
+            flash("Select a base item")
         try:
             try:
                 countItem2=db.query(VegItem).filter_by(item=request.form["mainmenu"]).one()
             except:
                 countItem3=db.query(NonVegItem).filter_by(item=request.form["mainmenu"]).one()
         except:
-            return apology("Select a menu from veg or non-veg")
+            flash("Select a menu from veg or non-veg")
         
         try:
             countItem1.count += 1
             db.add(countItem1)
             db.commit()
         except:
-            return apology("Something went wrong in selecting base menu. Please try again")
+            return apology("Please try again")
         
         try:
             countItem2.count += 1
@@ -79,7 +79,7 @@ def select():
                 db.add(countItem3)
                 db.commit()
             except:
-                return apology("Something went wrong in selecting main menu. Please try again")
+                return apology("Please try again")
         return redirect(url_for("index"))
     #return apology("TODO")
 
