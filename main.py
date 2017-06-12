@@ -50,6 +50,9 @@ def select():
         countItem1=0
         countItem2=0
         countItem3=0
+        student1=db.query(Student).filter_by(reg_no=session["reg_no"]).one()
+        if student1.checked==1:
+            return apology("Already Selected Your Choice")
         try:
             countItem1=db.query(BaseItem).filter_by(item=request.form["base"]).one()
         except:
@@ -80,6 +83,9 @@ def select():
                 db.commit()
             except:
                 return apology("Something went wrong in selecting main menu. Please try again")
+        student1.checked=1
+        db.add(student1)
+        db.commit()
         return redirect(url_for("index"))
     #return apology("TODO")
 
@@ -167,7 +173,9 @@ def register():
             return apology("Already Registered")
         db.add(result)
         db.commit()
-        session["user_id"]=result.id;
+        session["user_id"]=result.id
+        session["name"]=result.name
+        session["reg_no"]=result.reg_no
         return redirect(url_for('index'))
     else:
         return render_template("register.html")
