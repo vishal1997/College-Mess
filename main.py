@@ -40,7 +40,11 @@ def index():
 @login_required
 def select():
     """Buy shares of stock."""
-    return apology("TODO")
+    veg_items=db.query(VegItem).all()
+    nonveg_items=db.query(NonVegItem).all()
+    base_items=db.query(BaseItem).all()
+    return render_template("select.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
+    #return apology("TODO")
 
 @app.route("/history")
 @login_required
@@ -75,6 +79,8 @@ def login():
 
         # remember which user has logged in
         session["user_id"] = rows.id
+        session["reg_no"]=rows.reg_no
+        session["name"]=rows.name
 
         # redirect user to home page
         return redirect(url_for("index"))
