@@ -32,6 +32,7 @@ Session(app)
 #db=SQL("sqlite:///messmenu.db")
 
 @app.route("/")
+@app.route("/index")
 @login_required
 def index():
     return apology("TODO")
@@ -46,6 +47,39 @@ def select():
         base_items=db.query(BaseItem).all()
         return render_template("select.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
     else:
+        countItem1=0
+        countItem2=0
+        countItem3=0
+        try:
+            countItem1=db.query(BaseItem).filter_by(item=request.form["base"]).one()
+        except:
+            return apology("Select a base item")
+        try:
+            try:
+                countItem2=db.query(VegItem).filter_by(item=request.form["mainmenu"]).one()
+            except:
+                countItem3=db.query(NonVegItem).filter_by(item=request.form["mainmenu"]).one()
+        except:
+            return apology("Select a menu from veg or non-veg")
+        
+        try:
+            countItem1.count += 1
+            db.add(countItem1)
+            db.commit()
+        except:
+            return apology("Something went wrong in selecting base menu. Please try again")
+        
+        try:
+            countItem2.count += 1
+            db.add(countItem2)
+            db.commit()
+        except:
+            try:
+                countItem3.count += 1
+                db.add(countItem3)
+                db.commit()
+            except:
+                return apology("Something went wrong in selecting main menu. Please try again")
         return redirect(url_for("index"))
     #return apology("TODO")
 
@@ -75,7 +109,10 @@ def login():
 
         # query database for username
         #rows = db.execute("SELECT * FROM student WHERE reg_no = :reg_no", reg_no=request.form.get("reg_no"))
-        rows=db.query(Student).filter_by(reg_no=request.form['reg_no']).one()
+        try:
+            rows=db.query(Student).filter_by(reg_no=request.form['reg_no']).one()
+        except:
+            return apology("User not registered")
         # ensure username exists and password is correct
         if not pwd_context.verify(request.form["password"], rows.password):
             return apology("invalid registration no. and/or password")
