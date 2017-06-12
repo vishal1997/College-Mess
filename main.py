@@ -40,10 +40,13 @@ def index():
 @login_required
 def select():
     """Buy shares of stock."""
-    veg_items=db.query(VegItem).all()
-    nonveg_items=db.query(NonVegItem).all()
-    base_items=db.query(BaseItem).all()
-    return render_template("select.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
+    if request.method=='GET':
+        veg_items=db.query(VegItem).all()
+        nonveg_items=db.query(NonVegItem).all()
+        base_items=db.query(BaseItem).all()
+        return render_template("select.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
+    else:
+        return redirect(url_for("index"))
     #return apology("TODO")
 
 @app.route("/history")
