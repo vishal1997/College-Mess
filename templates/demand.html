@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% block title %}
+    Current Demand
+{% endblock %}
+
+{%block main %}
+
+<div class="row">
+
+    <div class="col-4">
+        <table class="table table-striped ">
+            <thead>
+                <tr>
+                    <th class="center">Veg Items</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>No. of students</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for vegItem in veg_items %}
+                <tr>
+                    <td>{{vegItem.item}}</td>
+                    <td>{{vegItem.count}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+        </div>
+
+
+    <div class="col-4">
+        <table class="table table-striped " >
+            <thead>
+                <tr>
+                    <th class="center">Base Items</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>No. of students</th>
+              </tr>
+            </thead>
+            <tbody>
+                {%for baseItem in base_items%}
+                <tr>
+                    <td>{{baseItem.item}}</td>
+                    <td>{{baseItem.count}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-4 ">
+        <table class="table table-striped " >
+        <thead>
+            <tr>
+                <th class="center">Non-Veg Items</th>
+            </tr>
+        </thead>
+        <thead>
+          <tr>
+            <th>Items</th>
+            <th>No. of students</th>
+          </tr>
+        </thead>
+        <tbody>
+            {%for nonVegItem in nonveg_items%}
+            <tr>
+                <td>{{nonVegItem.item}}</td>
+                <td>{{nonVegItem.count}}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+        </table>
+    </div>
+
+
+</form>
+
+{%endblock%}
