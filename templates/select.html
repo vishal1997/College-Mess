@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% block title %}
+    Select Menu
+{% endblock %}
+
+{%block main %}
+    <div class="row">
+
+        <table class="table table-striped col-4 left">
+        <thead>
+            <tr>
+                <th class="center">Veg Items</th>
+            </tr>
+        </thead>
+        <thead>
+          <tr>
+            <th>Items</th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for vegItem in veg_items %}
+            <tr>
+                <td>{{vegItem.item}}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+        </table>
+
+
+        <table class="table table-striped col-4 right">
+        <thead>
+            <tr>
+                <th class="center">Base Items</th>
+            </tr>
+        </thead>
+        <thead>
+          <tr>
+            <th>Items</th>
+          </tr>
+        </thead>
+        <tbody>
+            {%for baseItem in base_items%}
+            <tr>
+                <td>{{baseItem.item}}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+        </table>
+
+
+        <table class="table table-striped col-4 right">
+        <thead>
+            <tr>
+                <th class="center">Non-Veg Items</th>
+            </tr>
+        </thead>
+        <thead>
+          <tr>
+            <th>Items</th>
+          </tr>
+        </thead>
+        <tbody>
+            {%for nonVegItem in nonveg_items%}
+            <tr>
+                <td>{{nonVegItem.item}}</td>
+            </tr>
+            {%endfor%}
+        </tbody>
+        </table>
+    </div>
+{%endblock%}

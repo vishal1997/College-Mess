@@ -51,13 +51,15 @@
             </nav>
 
                 {% if session.user_id %}
-                <div class="form-control">
-                    <ul class ="nav navbar-nav navbar-left">
-                        <li>Name:</li>
-                    </ul>
-                    <ul class ="nav navbar-nav navbar-right">
-                        <li>Registration No.: </li>
-                    </ul>
+                <div class="grid username">
+                    <div class="row">
+                        <div class="col-6 left">
+                            Name: {{ session.name }}
+                        </div>
+                        <div class ="col-6 right">
+                            Registration No.: {{ session.reg_no  }}
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
 
