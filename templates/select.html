@@ -4,51 +4,68 @@
 {% endblock %}
 
 {%block main %}
-    <div class="row">
+<form action ="{{url_for('select')}}" method="POST">
+<div class="row">
 
-        <table class="table table-striped col-4 left">
-        <thead>
-            <tr>
-                <th class="center">Veg Items</th>
-            </tr>
-        </thead>
-        <thead>
-          <tr>
-            <th>Items</th>
-          </tr>
-        </thead>
-        <tbody>
-            {% for vegItem in veg_items %}
-            <tr>
-                <td>{{vegItem.item}}</td>
-            </tr>
-            {%endfor%}
-        </tbody>
+    <div class="col-4">
+        <table class="table table-striped ">
+            <thead>
+                <tr>
+                    <th class="center">Veg Items</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>Select</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for vegItem in veg_items %}
+                <tr>
+                    <td>{{vegItem.item}}</td>
+                    <td>
+                            <div class="radio">
+                                <label><input type="radio" id="{{vegItem.id}}}"name="optradio"></label>
+                            </div>
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
         </table>
+        </div>
 
 
-        <table class="table table-striped col-4 right">
-        <thead>
-            <tr>
-                <th class="center">Base Items</th>
-            </tr>
-        </thead>
-        <thead>
-          <tr>
-            <th>Items</th>
-          </tr>
-        </thead>
-        <tbody>
-            {%for baseItem in base_items%}
-            <tr>
-                <td>{{baseItem.item}}</td>
-            </tr>
-            {%endfor%}
-        </tbody>
+    <div class="col-4">
+        <table class="table table-striped " >
+            <thead>
+                <tr>
+                    <th class="center">Base Items</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>Select</th>
+              </tr>
+            </thead>
+            <tbody>
+                {%for baseItem in base_items%}
+                <tr>
+                    <td>{{baseItem.item}}</td>
+                    <td>
+                        <div class="radio">
+                            <label><input type="radio" id="{{baseItem.id}} "name="optradio1"></label>
+                        </div>
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
         </table>
+    </div>
 
-
-        <table class="table table-striped col-4 right">
+    <div class="col-4 ">
+        <table class="table table-striped " >
         <thead>
             <tr>
                 <th class="center">Non-Veg Items</th>
@@ -57,15 +74,27 @@
         <thead>
           <tr>
             <th>Items</th>
+            <th>Select</th>
           </tr>
         </thead>
         <tbody>
             {%for nonVegItem in nonveg_items%}
             <tr>
                 <td>{{nonVegItem.item}}</td>
+                <td>
+                    <div class="radio">
+                        <label><input type="radio" id="{{nonVegItem.id}}" name="optradio"></label>
+                    </div>
+
+                </td>
             </tr>
             {%endfor%}
         </tbody>
         </table>
     </div>
+    <button class="btn btn-primary center-block"  type="submit">Submit</button>
+
+</div>
+</form>
+
 {%endblock%}
