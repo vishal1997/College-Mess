@@ -143,7 +143,10 @@ def logout():
 @login_required
 def demand():
     """Get stock quote."""
-    return apology("TODO")
+    veg_items=db.query(VegItem).all()
+    nonveg_items=db.query(NonVegItem).all()
+    base_items=db.query(BaseItem).all()
+    return render_template("demand.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
