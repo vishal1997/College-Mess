@@ -1,12 +1,13 @@
 from flask import Flask, redirect, url_for, render_template, flash, request, jsonify
-
+from datetime import datetime, date
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
-from dataBase import Base, NonVegItem, VegItem,BaseItem, Student
+from dataBase import Base, NonVegItem, VegItem,BaseItem, Student, History,Bill
 from helpers import *
 from flask_session import Session
+from time import sleep
 engine = create_engine('sqlite:///messmenu.db')
 Base.metadata.bind = engine
 DBsession = sessionmaker(bind=engine)
@@ -29,65 +30,122 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-#db=SQL("sqlite:///messmenu.db")
+
+
 
 @app.route("/")
 @app.route("/index")
 @login_required
 def index():
+    reset()
     return apology("TODO")
+
+def reset():
+    today=date.today()
+    print("RESET")
+    try :
+        added_date = db.query(VegItem.time).filter_by(id="1").one()   
+    except:
+        print("No Items found")
+        return
+        
+    if today.day > added_date[0].day:
+        try:
+            num_rows_deleted = db.query(VegItem).delete()
+            db.commit()
+            num_rows_deleted = db.query(BaseItem).delete()
+            db.commit()
+            num_rows_deleted = db.query(NonVegItem).delete()
+            db.commit()
+            ss=db.query(Student).all()
+            for s in ss:
+                s.checked=0
+                db.add(s)
+                db.commit()
+        except:
+            return apology("No menu found")
+
+    
 
 @app.route("/select", methods=["GET", "POST"])
 @login_required
 def select():
-    """Buy shares of stock."""
     if request.method=='GET':
-        veg_items=db.query(VegItem).all()
-        nonveg_items=db.query(NonVegItem).all()
-        base_items=db.query(BaseItem).all()
+        try:
+            veg_items=db.query(VegItem).all()
+            nonveg_items=db.query(NonVegItem).all()
+            base_items=db.query(BaseItem).all()
+        except:
+            return apology("No data found")
         return render_template("select.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
     else:
         countItem1=0
         countItem2=0
         countItem3=0
+        student1=db.query(Student).filter_by(reg_no=session["reg_no"]).one()
+        if student1.checked==1:
+            return apology("Already Selected Your Choice")
         try:
             countItem1=db.query(BaseItem).filter_by(item=request.form["base"]).one()
         except:
-            flash("Select a base item")
+            return apology("Select a base item")
+        
+        reg_no=db.query(Bill).filter_by(reg_no=session['reg_no']).one()
         try:
             try:
                 countItem2=db.query(VegItem).filter_by(item=request.form["mainmenu"]).one()
+                reg_no.total_bill += countItem2.price
+                countItem3="NULL"
             except:
                 countItem3=db.query(NonVegItem).filter_by(item=request.form["mainmenu"]).one()
+                reg_no.total_bill += countItem3.price
+                countItem2="NULL"
         except:
-            flash("Select a menu from veg or non-veg")
+            return apology("Select a menu from veg or non-veg")
+            
+        
+        reg_no.total_bill += countItem1.price
         
         try:
             countItem1.count += 1
             db.add(countItem1)
             db.commit()
-        except:
-            return apology("Please try again")
-        
-        try:
-            countItem2.count += 1
-            db.add(countItem2)
-            db.commit()
-        except:
+
             try:
+                countItem2.count += 1
+                db.add(countItem2)
+                db.commit()
+            except:
                 countItem3.count += 1
                 db.add(countItem3)
                 db.commit()
+            db.add(reg_no)
+            db.commit()
+            
+            student1.checked=1
+            db.add(student1)
+            db.commit()
+            try:
+                result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
             except:
-                return apology("Please try again")
-        return redirect(url_for("index"))
-    #return apology("TODO")
+                result=History(reg_no=session['reg_no'],base=countItem3.item, nonveg=countItem3.item,veg="NULL")
+            db.add(result)
+            db.commit()
+            return redirect(url_for("index"))
+        except:
+            db.rollback()
+            return apology("Something went wrong")
+        
+        
+        
+
 
 @app.route("/history")
 @login_required
 def history():
-    """Show history of transactions."""
-    return apology("TODO")
+    """Show history."""
+    mess_history=db.query(History).filter_by(reg_no=session['reg_no']).all()
+    return render_template("history.html",mess_history=mess_history)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -143,7 +201,10 @@ def logout():
 @login_required
 def demand():
     """Get stock quote."""
-    return apology("TODO")
+    veg_items=db.query(VegItem).all()
+    nonveg_items=db.query(NonVegItem).all()
+    base_items=db.query(BaseItem).all()
+    return render_template("demand.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -162,26 +223,39 @@ def register():
         result=Student(reg_no=request.form['reg_no'], name=request.form['name'], password=pwd_context.hash(request.form.get("password")))
         if not result:
             return apology("Already Registered")
-        db.add(result)
+        set_bill=Bill(reg_no=request.form['reg_no'])
+        db.add(set_bill)
         db.commit()
-        session["user_id"]=result.id;
+        try:
+            db.add(result)
+            db.commit()
+        
+            session["user_id"]=result.id
+            session["name"]=result.name
+            session["reg_no"]=result.reg_no
+        except:
+            db.rollback()
         return redirect(url_for('index'))
     else:
         return render_template("register.html")
 
-@app.route("/choice", methods=["GET", "POST"])
-@login_required
-def choice():
-    """Sell shares of stock."""
-    return apology("TODO")
 
 @app.route("/bill", methods=["GET","POST"])
 @login_required
 def bill():
     """Bill till now"""
-    return apology("TODO")
+    try:
+        student_bill=db.query(Bill).filter_by(reg_no=session["reg_no"]).all()
+    except:
+        return redirect(url_for('index'))
+    sum=0;
+    for i in student_bill:
+        sum += i.total_bill
+    return render_template("bill.html",student_bill=student_bill,sum=sum)
+    
 
 if __name__=='__main__':
     app.secret_key='super_secret_key'
-    app.debug= True
+    app.debug= True        
     app.run(host='0.0.0.0',port=5000)
+    
