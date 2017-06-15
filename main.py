@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
-from dataBase import Base, NonVegItem, VegItem,BaseItem, Student, History
+from dataBase import Base, NonVegItem, VegItem,BaseItem, Student, History,Bill
 from helpers import *
 from flask_session import Session
 from time import sleep
@@ -49,7 +49,7 @@ def reset():
         print("No Items found")
         return
         
-    if today.day > added_date[0].day +2:
+    if today.day > added_date[0].day:
         try:
             num_rows_deleted = db.query(VegItem).delete()
             db.commit()
@@ -70,7 +70,6 @@ def reset():
 @app.route("/select", methods=["GET", "POST"])
 @login_required
 def select():
-    """Buy shares of stock."""
     if request.method=='GET':
         try:
             veg_items=db.query(VegItem).all()
@@ -90,52 +89,59 @@ def select():
             countItem1=db.query(BaseItem).filter_by(item=request.form["base"]).one()
         except:
             return apology("Select a base item")
+        
+        reg_no=db.query(Bill).filter_by(reg_no=session['reg_no']).one()
         try:
             try:
                 countItem2=db.query(VegItem).filter_by(item=request.form["mainmenu"]).one()
+                reg_no.total_bill += countItem2.price
                 countItem3="NULL"
             except:
                 countItem3=db.query(NonVegItem).filter_by(item=request.form["mainmenu"]).one()
+                reg_no.total_bill += countItem3.price
                 countItem2="NULL"
         except:
             return apology("Select a menu from veg or non-veg")
+            
+        
+        reg_no.total_bill += countItem1.price
         
         try:
             countItem1.count += 1
             db.add(countItem1)
             db.commit()
-        except:
-            return apology("Something went wrong in selecting base menu. Please try again")
-        
-        try:
-            countItem2.count += 1
-            db.add(countItem2)
-            db.commit()
-        except:
             try:
+                countItem2.count += 1
+                db.add(countItem2)
+                db.commit()
+            except:
                 countItem3.count += 1
                 db.add(countItem3)
                 db.commit()
+            db.add(reg_no)
+            db.commit()
+            
+            student1.checked=1
+            db.add(student1)
+            db.commit()
+            try:
+                result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
             except:
-                return apology("Something went wrong in selecting main menu. Please try again")
-        
-
-        student1.checked=1
-        db.add(student1)
-        db.commit()
-        try:
-            result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
+                result=History(reg_no=session['reg_no'],base=countItem3.item, nonveg=countItem3.item,veg="NULL")
+            db.add(result)
+            db.commit()
+            return redirect(url_for("index"))
         except:
-            result=History(reg_no=session['reg_no'],base=countItem.item, nonveg=countItem3.item,veg="NULL")
-        db.add(result)
-        db.commit()
-        return redirect(url_for("index"))
-    #return apology("TODO")
+            db.rollback()
+            return apology("Something went wrong")
+        
+        
+        
 
 @app.route("/history")
 @login_required
 def history():
-    """Show history of transactions."""
+    """Show history."""
     mess_history=db.query(History).filter_by(reg_no=session['reg_no']).all()
     return render_template("history.html",mess_history=mess_history)
 
@@ -215,6 +221,9 @@ def register():
         result=Student(reg_no=request.form['reg_no'], name=request.form['name'], password=pwd_context.hash(request.form.get("password")))
         if not result:
             return apology("Already Registered")
+        set_bill=Bill(reg_no=request.form['reg_no'])
+        db.add(set_bill)
+        db.commit()
         try:
             db.add(result)
             db.commit()
@@ -228,17 +237,20 @@ def register():
     else:
         return render_template("register.html")
 
-@app.route("/choice", methods=["GET", "POST"])
-@login_required
-def choice():
-    """Sell shares of stock."""
-    return apology("TODO")
 
 @app.route("/bill", methods=["GET","POST"])
 @login_required
 def bill():
     """Bill till now"""
-    return apology("TODO")
+    try:
+        student_bill=db.query(Bill).filter_by(reg_no=session["reg_no"]).all()
+    except:
+        return redirect(url_for('index'))
+    sum=0;
+    for i in student_bill:
+        sum += i.total_bill
+    return render_template("bill.html",student_bill=student_bill,sum=sum)
+    
 
 if __name__=='__main__':
     app.secret_key='super_secret_key'
