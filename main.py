@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
-from dataBase import Base, NonVegItem, VegItem,BaseItem, Student
+from dataBase import Base, NonVegItem, VegItem,BaseItem, Student, History
 from helpers import *
 from flask_session import Session
 from time import sleep
@@ -93,8 +93,10 @@ def select():
         try:
             try:
                 countItem2=db.query(VegItem).filter_by(item=request.form["mainmenu"]).one()
+                countItem3="NULL"
             except:
                 countItem3=db.query(NonVegItem).filter_by(item=request.form["mainmenu"]).one()
+                countItem2="NULL"
         except:
             return apology("Select a menu from veg or non-veg")
         
@@ -116,8 +118,16 @@ def select():
                 db.commit()
             except:
                 return apology("Something went wrong in selecting main menu. Please try again")
+        
+
         student1.checked=1
         db.add(student1)
+        db.commit()
+        try:
+            result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
+        except:
+            result=History(reg_no=session['reg_no'],base=countItem.item, nonveg=countItem3.item,veg="NULL")
+        db.add(result)
         db.commit()
         return redirect(url_for("index"))
     #return apology("TODO")
@@ -126,7 +136,8 @@ def select():
 @login_required
 def history():
     """Show history of transactions."""
-    return apology("TODO")
+    mess_history=db.query(History).filter_by(reg_no=session['reg_no']).all()
+    return render_template("history.html",mess_history=mess_history)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
