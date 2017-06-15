@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, render_template, flash, request, jsonify
-
+from datetime import datetime, date
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
@@ -7,6 +7,7 @@ from tempfile import mkdtemp
 from dataBase import Base, NonVegItem, VegItem,BaseItem, Student
 from helpers import *
 from flask_session import Session
+from time import sleep
 engine = create_engine('sqlite:///messmenu.db')
 Base.metadata.bind = engine
 DBsession = sessionmaker(bind=engine)
@@ -29,22 +30,54 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-#db=SQL("sqlite:///messmenu.db")
+
+
 
 @app.route("/")
 @app.route("/index")
 @login_required
 def index():
+    reset()
     return apology("TODO")
+
+def reset():
+    today=date.today()
+    print("RESET")
+    try :
+        added_date = db.query(VegItem.time).filter_by(id="1").one()   
+    except:
+        print("No Items found")
+        return
+        
+    if today.day > added_date[0].day +2:
+        try:
+            num_rows_deleted = db.query(VegItem).delete()
+            db.commit()
+            num_rows_deleted = db.query(BaseItem).delete()
+            db.commit()
+            num_rows_deleted = db.query(NonVegItem).delete()
+            db.commit()
+            ss=db.query(Student).all()
+            for s in ss:
+                s.checked=0
+                db.add(s)
+                db.commit()
+        except:
+            return apology("No menu found")
+
+    
 
 @app.route("/select", methods=["GET", "POST"])
 @login_required
 def select():
     """Buy shares of stock."""
     if request.method=='GET':
-        veg_items=db.query(VegItem).all()
-        nonveg_items=db.query(NonVegItem).all()
-        base_items=db.query(BaseItem).all()
+        try:
+            veg_items=db.query(VegItem).all()
+            nonveg_items=db.query(NonVegItem).all()
+            base_items=db.query(BaseItem).all()
+        except:
+            return apology("No data found")
         return render_template("select.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
     else:
         countItem1=0
@@ -171,11 +204,15 @@ def register():
         result=Student(reg_no=request.form['reg_no'], name=request.form['name'], password=pwd_context.hash(request.form.get("password")))
         if not result:
             return apology("Already Registered")
-        db.add(result)
-        db.commit()
-        session["user_id"]=result.id
-        session["name"]=result.name
-        session["reg_no"]=result.reg_no
+        try:
+            db.add(result)
+            db.commit()
+        
+            session["user_id"]=result.id
+            session["name"]=result.name
+            session["reg_no"]=result.reg_no
+        except:
+            db.rollback()
         return redirect(url_for('index'))
     else:
         return render_template("register.html")
@@ -194,5 +231,6 @@ def bill():
 
 if __name__=='__main__':
     app.secret_key='super_secret_key'
-    app.debug= True
+    app.debug= True        
     app.run(host='0.0.0.0',port=5000)
+    
