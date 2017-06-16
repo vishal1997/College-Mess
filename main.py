@@ -128,7 +128,7 @@ def select():
             try:
                 result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
             except:
-                result=History(reg_no=session['reg_no'],base=countItem3.item, nonveg=countItem3.item,veg="NULL")
+                result=History(reg_no=session['reg_no'],base=countItem1.item, nonveg=countItem3.item,veg="NULL")
             db.add(result)
             db.commit()
             return redirect(url_for("index"))
