@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block title %}
+    Bill
+{% endblock %}
+
+
+{% block main %}
+<form action ="{{url_for('choice')}}" method="POST">
+<div class="row">
+    <div class="col-12">
+        <table class="table table-striped ">
+            <thead>
+              <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+                <tr class="Info">
+                    <td>Date{{date1}}</td>
+                    <td><button class="btn btn-default" type="submit" name="breakfast1" value="breakfast1">Breakfast </button></td>
+                    <td><button class="btn btn-default" type="submit" value="lunch1"name="lunch1">Lunch</button></td>
+                    <td><button class="btn btn-default" type="submit" name="snacks1" value="snacks1">Snacks</button></td>
+                    <td><button class="btn btn-default" type="submit" value="dinner1" name="dinner1">Dinner </button></td>
+                </tr>
+                <tr class="Info">
+                    <td>Date{{date2}}</td>
+                    <td><button class="btn btn-default" type="submit" name="breakfast2" value="breakfast2"> Breakfast</button></td>
+                    <td><button class="btn btn-default" type="submit" value="lunch2" name="lunch2"> Lunch</button></td>
+                    <td><button class="btn btn-default" type="submit" name="snacks2" value="snacks2">Snacks </button></td>
+                    <td><button class="btn btn-default" type="submit" value="dinner2" name="dinner2">Dinner</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</form>
+{%endblock%}
