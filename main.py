@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from passlib.apps import custom_app_context as pwd_context
 from tempfile import mkdtemp
-from dataBase import Base, Student, History,Bill,BFMenu1,BFMenu2,BFMenu3,BFMenu4, NonVegItemLunch,NonVegItemDinner,VegItemLunch,VegItemDinner,BaseItemLunch,BaseItemDinner
+from dataBase import Base, Student, History,Bill,BFMenu1,BFMenu2,BFMenu3,BFMenu4, Snack1,Snack2,NonVegItemLunch,NonVegItemDinner,VegItemLunch,VegItemDinner,BaseItemLunch,BaseItemDinner
 from helpers import *
 from flask_session import Session
 from time import sleep
@@ -44,19 +44,40 @@ def reset():
     today=date.today()
     print("RESET")
     try :
-        added_date = db.query(VegItem.time).filter_by(id="1").one()   
+        added_date = db.query(VegItemDinner.time).filter_by(id="1").one()   
     except:
-        print("No Items found")
-        return
+        return apology("No Items found")
         
     if today.day > added_date[0].day:
         try:
-            num_rows_deleted = db.query(VegItem).delete()
+            num_rows_deleted = db.query(VegItemLunch).delete()
             db.commit()
-            num_rows_deleted = db.query(BaseItem).delete()
+            num_rows_deleted = db.query(BaseItemLunch).delete()
             db.commit()
-            num_rows_deleted = db.query(NonVegItem).delete()
+            num_rows_deleted = db.query(NonVegItemLunch).delete()
             db.commit()
+            
+            num_rows_deleted = db.query(VegItemDinner).delete()
+            db.commit()
+            num_rows_deleted = db.query(BaseItemDinner).delete()
+            db.commit()
+            num_rows_deleted = db.query(NonVegItemDinner).delete()
+            db.commit()
+            
+            num_rows_deleted = db.query(BFMenu1).delete()
+            db.commit()
+            num_rows_deleted = db.query(BFMenu2).delete()
+            db.commit()
+            num_rows_deleted = db.query(BFMenu3).delete()
+            db.commit()
+            num_rows_deleted = db.query(BFMenu4).delete()
+            db.commit()
+            
+            num_rows_deleted = db.query(Snack1).delete()
+            db.commit()
+            num_rows_deleted = db.query(Snack2).delete()
+            db.commit()
+            
             ss=db.query(Student).all()
             for s in ss:
                 s.checked=0
@@ -105,6 +126,11 @@ def breakfast(dateId):
             return apology("Select from menu 4")
         
         try:
+            try:
+                result=History.BFHistory(reg_no=session['reg_no'],bfast1=item1.item,bfast2=item2.item,bfast3=item3.item, bfast4= item4.item)
+            except:
+                return apology("Error while updating breakfast history ")
+                
             item1.count += 1
             db.add(item1)
             db.commit()
@@ -127,12 +153,9 @@ def breakfast(dateId):
             student1.checked_bf=1
             db.add(student1)
             db.commit()
-            """try:
-                result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
-            except:
-                result=History(reg_no=session['reg_no'],base=countItem3.item, nonveg=countItem3.item,veg="NULL")
+            
             db.add(result)
-            db.commit()"""
+            db.commit()
             return redirect(url_for("index"))
         except:
             db.rollback()
@@ -188,6 +211,11 @@ def lunch(dateId):
         reg_no.total_bill += countItem1.price
         
         try:
+            try:
+                result=History.LunchHistory(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
+            except:
+                result=History.LunchHistory(reg_no=session['reg_no'],base=countItem1.item, nonveg=countItem3.item,veg="NULL")
+                
             countItem1.count += 1
             db.add(countItem1)
             db.commit()
@@ -206,12 +234,10 @@ def lunch(dateId):
             student1.checked_ln=1
             db.add(student1)
             db.commit()
-            try:
-                result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
-            except:
-                result=History(reg_no=session['reg_no'],base=countItem3.item, nonveg=countItem3.item,veg="NULL")
+            
             db.add(result)
             db.commit()
+            
             return redirect(url_for("index"))
         except:
             db.rollback()
@@ -258,6 +284,11 @@ def dinner(dateId):
         reg_no.total_bill += countItem1.price
         
         try:
+            try:
+                result=History.DinnerHistory(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
+            except:
+                result=History.DinnerHistory(reg_no=session['reg_no'],base=countItem1.item, nonveg=countItem3.item,veg="NULL")
+                
             countItem1.count += 1
             db.add(countItem1)
             db.commit()
@@ -276,10 +307,7 @@ def dinner(dateId):
             student1.checked_dn=1
             db.add(student1)
             db.commit()
-            try:
-                result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
-            except:
-                result=History(reg_no=session['reg_no'],base=countItem3.item, nonveg=countItem3.item,veg="NULL")
+                
             db.add(result)
             db.commit()
             return redirect(url_for("index"))
@@ -293,15 +321,70 @@ def dinner(dateId):
 @app.route('/snacks/<int:dateId>/', methods=["GET","POST"])
 @login_required
 def snacks(dateId):
-    return apology("Not yet completed")     
+    if request.method=="POST":
+        item1=0
+        item2=0
+        
+        student1=db.query(Student).filter_by(reg_no=session["reg_no"]).one()
+        if student1.checked==1 or student1.checked_sn==1:
+            return apology("Already Selected Your Choice")
+        reg_no=db.query(Bill).filter_by(reg_no=session['reg_no']).one()
+        
+        try:
+            item1=db.query(Snack1).filter_by(item=request.form["snack1"]).one()
+            reg_no.total_bill += item1.price
+        except:
+            return apology("Select from menu 1")
+        
+        try:
+            item2=db.query(Snack2).filter_by(item=request.form["snack2"]).one()
+            reg_no.total_bill += item2.price
+        except:
+            return apology("Select from menu 2")
+            
+        
+        try:
+            
+            try:
+                result=History.SnacksHistory(reg_no=session['reg_no'],sn1=item1.item,sn2=item2.item)
+            except:
+                return apology("Error while updating history")
+            
+            item1.count += 1
+            db.add(item1)
+            db.commit()
+            
+            item2.count += 1
+            db.add(item2)
+            db.commit()
+            
+            db.add(reg_no)
+            db.commit()
+            
+            student1.checked_sn=1
+            db.add(student1)
+            db.commit()
+            
+            db.add(result)
+            db.commit()
+            return redirect(url_for("index"))
+        except:
+            db.rollback()
+            return apology("Something went wrong")
+        
+        
+        
+    else:
+        sn1=db.query(Snack1).all()
+        sn2=db.query(Snack2).all()
+        return render_template("snacks.html",dateId=dateId, menu1_items=sn1, menu2_items=sn2)
+    
     
     
 
-    
-
-@app.route("/choice", methods=["GET","POST"])
+@app.route("/select", methods=["GET","POST"])
 @login_required
-def choice():
+def select():
     if request.method=="POST":
         if request.form.get("breakfast1"):
             return redirect(url_for('breakfast',dateId=1))
@@ -330,87 +413,72 @@ def choice():
             return apology("Something went wrong")
             
     else:
-        return render_template("choice.html")
+        return render_template("select.html")
 
-@app.route("/select", methods=["GET", "POST"])
+@app.route("/history/breakfast/<int:dateId>", methods=["POST","GET"])
 @login_required
-def select():
-    if request.method=='GET':
-        try:
-            veg_items=db.query(VegItem).all()
-            nonveg_items=db.query(NonVegItem).all()
-            base_items=db.query(BaseItem).all()
-        except:
-            return apology("No data found")
-        return render_template("select.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
-    else:
-        countItem1=0
-        countItem2=0
-        countItem3=0
-        student1=db.query(Student).filter_by(reg_no=session["reg_no"]).one()
-        if student1.checked==1:
-            return apology("Already Selected Your Choice")
-        try:
-            countItem1=db.query(BaseItem).filter_by(item=request.form["base"]).one()
-        except:
-            return apology("Select a base item")
-        
-        reg_no=db.query(Bill).filter_by(reg_no=session['reg_no']).one()
-        try:
-            try:
-                countItem2=db.query(VegItem).filter_by(item=request.form["mainmenu"]).one()
-                reg_no.total_bill += countItem2.price
-                countItem3="NULL"
-            except:
-                countItem3=db.query(NonVegItem).filter_by(item=request.form["mainmenu"]).one()
-                reg_no.total_bill += countItem3.price
-                countItem2="NULL"
-        except:
-            return apology("Select a menu from veg or non-veg")
-            
-        
-        reg_no.total_bill += countItem1.price
-        
-        try:
-            countItem1.count += 1
-            db.add(countItem1)
-            db.commit()
+def bfHistory(dateId):
+    mess_history=db.query(History.BFHistory).filter_by(reg_no=session['reg_no']).all()
+    return render_template("bfHistory.html",mess_history=mess_history)   
 
-            try:
-                countItem2.count += 1
-                db.add(countItem2)
-                db.commit()
-            except:
-                countItem3.count += 1
-                db.add(countItem3)
-                db.commit()
-            db.add(reg_no)
-            db.commit()
-            
-            student1.checked=1
-            db.add(student1)
-            db.commit()
-            try:
-                result=History(reg_no=session['reg_no'],base=countItem1.item,veg=countItem2.item,nonveg="NULL")
-            except:
-                result=History(reg_no=session['reg_no'],base=countItem3.item, nonveg=countItem3.item,veg="NULL")
-            db.add(result)
-            db.commit()
-            return redirect(url_for("index"))
-        except:
-            db.rollback()
-            return apology("Something went wrong")
-        
-        
-        
+    
+@app.route("/history/lunch/<int:dateId>", methods=["POST","GET"])
+@login_required
+def lnHistory(dateId):
+    mess_history=db.query(History.LunchHistory).filter_by(reg_no=session['reg_no']).all()
+    return render_template("lnHistory.html",mess_history=mess_history) 
+    
+    
+@app.route("/history/dinner/<int:dateId>", methods=["POST","GET"])
+@login_required
+def dnHistory(dateId):
+    mess_history=db.query(History.DinnerHistory).filter_by(reg_no=session['reg_no']).all()
+    return render_template("lnHistory.html",mess_history=mess_history) 
 
 
-@app.route("/history")
+@app.route("/history/snacks/<int:dateId>", methods=["POST","GET"])
+@login_required
+def snHistory(dateId):
+    mess_history=db.query(History.SnacksHistory).filter_by(reg_no=session['reg_no']).all()
+    return render_template("snHistory.html",mess_history=mess_history) 
+    
+    
+
+@app.route("/history", methods=["POST","GET"])
 @login_required
 def history():
     """Show history."""
-    mess_history=db.query(History).filter_by(reg_no=session['reg_no']).all()
-    return render_template("history.html",mess_history=mess_history)
+    if request.method=="POST":
+        if request.form.get("breakfast1"):
+            return redirect(url_for('bfHistory',dateId=1))
+            
+        elif request.form.get("lunch1"):
+            return redirect(url_for('lnHistory', dateId=1))
+            
+        elif request.form.get("snacks1"):
+            return redirect(url_for('snHistory', dateId=1))
+            
+        elif request.form.get("dinner1"):
+            return redirect(url_for('dnHistory', dateId=1))
+            
+        elif request.form.get("breakfast2"):
+            return redirect(url_for('bfHistory',dateId=2))
+            
+        elif request.form.get("lunch2"):
+            return redirect(url_for('lnHistory', dateId=2))
+            
+        elif request.form.get("snacks2"):
+            return redirect(url_for('snHistory',dateId=2))
+            
+        elif request.form.get("dinner2"):
+            return redirect(url_for('dnHistory', dateId=2))
+        else:
+            return apology("Something went wrong")
+        
+        """mess_history=db.query(History.DinnerHistory).filter_by(reg_no=session['reg_no']).all()
+        return render_template("history.html",mess_history=mess_history)"""
+    else:
+        return render_template("history.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -466,10 +534,26 @@ def logout():
 @login_required
 def demand():
     """Get stock quote."""
-    veg_items=db.query(VegItem).all()
-    nonveg_items=db.query(NonVegItem).all()
-    base_items=db.query(BaseItem).all()
-    return render_template("demand.html",veg_items=veg_items,nonveg_items=nonveg_items,base_items=base_items)
+    if request.method=="POST":
+        snacks1=db.query(Snack1).all()
+        snacks2=db.query(Snack2).all()
+        bfmenu1=db.query(BFMenu1).all()
+        bfmenu2=db.query(BFMenu2).all()
+        bfmenu3=db.query(BFMenu3).all()
+        bfmenu4=db.query(BFMenu4).all()
+        return render_template("snacksBF.html",snacks1=snacks1, snacks2=snacks2,bfmenu1=bfmenu1,bfmenu2=bfmenu2,bfmenu3=bfmenu3,bfmenu4=bfmenu4)    
+        
+        
+    veg_items_d=db.query(VegItemDinner).all()
+    nonveg_items_d=db.query(NonVegItemDinner).all()
+    base_items_d=db.query(BaseItemDinner).all()
+    
+    veg_items_l=db.query(VegItemLunch).all()
+    nonveg_items_l=db.query(NonVegItemLunch).all()
+    base_items_l=db.query(BaseItemLunch).all()
+    
+    
+    return render_template("demand.html",veg_items_d=veg_items_d,nonveg_items_d=nonveg_items_d,base_items_d=base_items_d,veg_items_l=veg_items_l,nonveg_items_l=nonveg_items_l,base_items_l=base_items_l)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
