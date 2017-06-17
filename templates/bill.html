@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}
+    Bill
+{% endblock %}
+
+
+{% block main %}
+<div class="row">
+    <div class="col-12">
+        <table class="table table-striped ">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Bill</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for i in student_bill %}
+                <tr>
+                    <td>{{i.date_time}}</td>
+                    <td>₹{{i.total_bill}}</td>
+                </tr>
+                {%endfor%}
+                <tr>
+                    <td>Total Amount</td>
+                    <td>₹{{sum}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{%endblock%}

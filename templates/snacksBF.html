@@ -6,14 +6,14 @@
 {%block main %}
 
 <div class="well well-sm">
-Dinner
+Snacks
 </div>
 <div class="row">
-    <div class="col-4">
+    <div class="col-6">
         <table class="table table-striped ">
             <thead>
                 <tr>
-                    <th class="center">Dinner Veg Items </th>
+                    <th class="center">Snacks Item 1</th>
                 </tr>
             </thead>
             <thead>
@@ -23,10 +23,10 @@ Dinner
               </tr>
             </thead>
             <tbody>
-                {% for vegItem_d in veg_items_d %}
+                {% for s in snacks1 %}
                 <tr>
-                    <td>{{vegItem_d.item}}</td>
-                    <td>{{vegItem_d.count}}</td>
+                    <td>{{s.item}}</td>
+                    <td>{{s.count}}</td>
                 </tr>
                 {%endfor%}
             </tbody>
@@ -34,11 +34,11 @@ Dinner
     </div>
 
 
-    <div class="col-4">
+    <div class="col-6">
         <table class="table table-striped " >
             <thead>
                 <tr>
-                    <th class="center">Dinner Base Items</th>
+                    <th class="center">Snack2</th>
                 </tr>
             </thead>
             <thead>
@@ -48,21 +48,31 @@ Dinner
               </tr>
             </thead>
             <tbody>
-                {%for baseItem_d in base_items_d%}
+                {%for s in snacks2%}
                 <tr>
-                    <td>{{baseItem_d.item}}</td>
-                    <td>{{baseItem_d.count}}</td>
+                    <td>{{s.item}}</td>
+                    <td>{{s.count}}</td>
                 </tr>
                 {%endfor%}
             </tbody>
         </table>
     </div>
+</div>
 
-    <div class="col-4 ">
+
+
+<div class="well well-sm">
+    Breakfast
+</div>
+
+
+
+<div class ="row">
+    <div class="col-6 ">
         <table class="table table-striped " >
         <thead>
             <tr>
-                <th class="center">Dinner Non-Veg Items</th>
+                <th class="center">Breakfast 1</th>
             </tr>
         </thead>
         <thead>
@@ -72,25 +82,21 @@ Dinner
           </tr>
         </thead>
         <tbody>
-            {%for nonVegItem_d in nonveg_items_d%}
+            {%for bf in bfmenu1%}
             <tr>
-                <td>{{nonVegItem_d.item}}</td>
-                <td>{{nonVegItem_d.count}}</td>
+                <td>{{bf.item}}</td>
+                <td>{{bf.count}}</td>
             </tr>
             {%endfor%}
         </tbody>
         </table>
     </div>
-</div>
-<div class="well well-sm">
-Lunch
-</div>
-<div class="row">
-    <div class="col-4">
+
+    <div class="col-6">
         <table class="table table-striped ">
             <thead>
                 <tr>
-                    <th class="center">Lunch Veg Items </th>
+                    <th class="center">Breakfast 2 </th>
                 </tr>
             </thead>
             <thead>
@@ -100,22 +106,23 @@ Lunch
               </tr>
             </thead>
             <tbody>
-                {% for vegItem_l in veg_items_l %}
+                {% for bf in bfmenu2 %}
                 <tr>
-                    <td>{{vegItem_l.item}}</td>
-                    <td>{{vegItem_l.count}}</td>
+                    <td>{{bf.item}}</td>
+                    <td>{{bf.count}}</td>
                 </tr>
                 {%endfor%}
             </tbody>
         </table>
         </div>
 
-
-    <div class="col-4">
+</div>
+<div class="row">
+    <div class="col-6">
         <table class="table table-striped " >
             <thead>
                 <tr>
-                    <th class="center">Lunch Base Items</th>
+                    <th class="center">Breakfast 3</th>
                 </tr>
             </thead>
             <thead>
@@ -125,21 +132,21 @@ Lunch
               </tr>
             </thead>
             <tbody>
-                {%for baseItem_l in base_items_l%}
+                {%for bf in bfmenu3%}
                 <tr>
-                    <td>{{baseItem_l.item}}</td>
-                    <td>{{baseItem_l.count}}</td>
+                    <td>{{bf.item}}</td>
+                    <td>{{bf.count}}</td>
                 </tr>
                 {%endfor%}
             </tbody>
         </table>
     </div>
 
-    <div class="col-4 ">
+    <div class="col-6">
         <table class="table table-striped " >
         <thead>
             <tr>
-                <th class="center">Lunch Non-Veg Items</th>
+                <th class="center">Breakfast 4</th>
             </tr>
         </thead>
         <thead>
@@ -149,10 +156,10 @@ Lunch
           </tr>
         </thead>
         <tbody>
-            {%for nonVegItem_l in nonveg_items_l%}
+            {%for bf in bfmenu4%}
             <tr>
-                <td>{{nonVegItem_l.item}}</td>
-                <td>{{nonVegItem_l.count}}</td>
+                <td>{{bf.item}}</td>
+                <td>{{bf.count}}</td>
             </tr>
             {%endfor%}
         </tbody>
@@ -160,9 +167,4 @@ Lunch
     </div>
 
 </div>
-<form action="{{url_for('demand')}}" method="POST">
-    <div class="well well-sm">
-        <button class="btn btn-default" type="Submit" name="submit" value="submit">Demand (Snacks & Breakfast)</button>
-    </div>
-</form>
 {%endblock%}

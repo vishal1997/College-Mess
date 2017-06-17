@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+{% block title %}
+    Breakfast
+{% endblock %}
+
+{%block main %}
+<form action ="{{url_for('breakfast', dateId=dateId)}}" method="POST">
+    <div class="well well-sm">
+        Breakfast
+    </div>
+<div class="row">
+
+    <div class="col-3">
+        <table class="table table-striped ">
+            <thead>
+                <tr>
+                    <th class="center">Menu 1</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>Select</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for menu1 in menu1_items %}
+                <tr>
+                    <td>{{menu1.item}}</td>
+                    <td>
+                            <div class="radio">
+                                <label><input type="radio" id="{{menu1.item}}}"  value="{{menu1.item}}" name="menu1"></label>
+                            </div>
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+        </div>
+
+
+    <div class="col-3">
+        <table class="table table-striped " >
+            <thead>
+                <tr>
+                    <th class="center">Menu 2</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>Select</th>
+              </tr>
+            </thead>
+            <tbody>
+                {%for menu2 in menu2_items%}
+                <tr>
+                    <td>{{menu2.item}}</td>
+                    <td>
+                        <div class="radio">
+                            <label><input type="radio" id="{{menu2.item}} " value="{{menu2.item}}" name="menu2"></label>
+                        </div>
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col-3 ">
+        <table class="table table-striped " >
+        <thead>
+            <tr>
+                <th class="center">Menu 3</th>
+            </tr>
+        </thead>
+        <thead>
+          <tr>
+            <th>Items</th>
+            <th>Select</th>
+          </tr>
+        </thead>
+        <tbody>
+            {%for menu3 in menu3_items%}
+            <tr>
+                <td>{{menu3.item}}</td>
+                <td>
+                    <div class="radio">
+                        <label><input type="radio" id="{{menu3.item}}"  value="{{menu3.item}}" name="menu3"></label>
+                    </div>
+
+                </td>
+            </tr>
+            {%endfor%}
+        </tbody>
+        </table>
+    </div>
+
+    <div class="col-3 ">
+        <table class="table table-striped " >
+        <thead>
+            <tr>
+                <th class="center">Menu 4</th>
+            </tr>
+        </thead>
+        <thead>
+          <tr>
+            <th>Items</th>
+            <th>Select</th>
+          </tr>
+        </thead>
+        <tbody>
+            {%for menu4 in menu4_items%}
+            <tr>
+                <td>{{menu4.item}}</td>
+                <td>
+                    <div class="radio">
+                        <label><input type="radio" id="{{menu4.item}}"  value="{{menu4.item}}" name="menu4"></label>
+                    </div>
+
+                </td>
+            </tr>
+            {%endfor%}
+        </tbody>
+        </table>
+    </div>
+    <button class="btn btn-primary center-block"  type="submit">Submit</button>
+
+</div>
+</form>
+
+{%endblock%}
