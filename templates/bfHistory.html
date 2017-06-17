@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+<div class="row">
+    <div class="col-12">
+        <table class="table table-striped ">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Menu 1</th>
+                <th>Menu 2</th>
+                <th>Menu 3</th>
+                <th>Menu 4</th>
+
+              </tr>
+            </thead>
+            <tbody>
+                {% for i in mess_history %}
+                <tr>
+                    <td>{{i.date_time}}</td>
+                    <td>{{i.bfast1}}</td>
+                    <td>{{i.bfast2}}</td>
+                    <td>{{i.bfast3}}</td>
+                    <td>{{i.bfast4}}</td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+{%endblock%}

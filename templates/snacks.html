@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block title %}
+    Snacks
+{% endblock %}
+
+{%block main %}
+<form action ="{{url_for('snacks', dateId=dateId)}}" method="POST">
+    <div class="well well-sm">
+        Snacks
+    </div>
+<div class="row">
+
+    <div class="col-6">
+        <table class="table table-striped ">
+            <thead>
+                <tr>
+                    <th class="center">Menu 1</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>Select</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for menu1 in menu1_items %}
+                <tr>
+                    <td>{{menu1.item}}</td>
+                    <td>
+                            <div class="radio">
+                                <label><input type="radio" id="{{menu1.item}}}"  value="{{menu1.item}}" name="snack1"></label>
+                            </div>
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="col-6">
+        <table class="table table-striped " >
+            <thead>
+                <tr>
+                    <th class="center">Menu 2</th>
+                </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>Items</th>
+                <th>Select</th>
+              </tr>
+            </thead>
+            <tbody>
+                {%for menu2 in menu2_items%}
+                <tr>
+                    <td>{{menu2.item}}</td>
+                    <td>
+                        <div class="radio">
+                            <label><input type="radio" id="{{menu2.item}} " value="{{menu2.item}}" name="snack2"></label>
+                        </div>
+                    </td>
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+    <button class="btn btn-primary center-block"  type="submit">Submit</button>
+</div>
+</form>
+
+{%endblock%}
