@@ -8,7 +8,7 @@ class Util:
     def reset():
         today=date.today()
         print("RESET")
-        try :
+        try:
             added_date = db.query(VegItemDinner.time).filter_by(id="1").one()   
         except:
             return apology("No Items found")
